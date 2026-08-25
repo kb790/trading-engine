@@ -1,0 +1,15 @@
+# Secrets -- never commit
+.env
+
+# Caches / generated state
+.cache/
+__pycache__/
+*.pyc
+rebalance_state.json
+
+# Virtual environment
+venv/
+
+# Data files you may not want tracked
+trades.csv
+portfolio.json

@@ -1,15 +1,23 @@
 # Quant Backtester: Systematic Evaluation of ML-Based Equity Signals
 
 A research project testing whether machine learning models can find a real, exploitable
-edge in predicting equity returns using public data — and a case study in how easily
+edge in predicting equity returns using public data  -  and a case study in how easily
 a backtest can look successful before it survives rigorous scrutiny.
 
 **Short version of the finding:** across multiple targets, feature sets, model families,
 and a systematic search for statistical arbitrage pairs, no approach here produced a
-signal that reliably survives significance testing. That's not a failed project — it's
+signal that reliably survives significance testing. That's not a failed project  -  it's
 the actual, well-evidenced answer this repo set out to find, and it's consistent with
 decades of academic finance research on market efficiency in liquid, heavily-analyzed
 large-cap equities.
+
+**What's in this repo, in one line each:**
+- **`main.py`**  -  the backtest. Trains the ranking model on historical data and
+  produces a chart comparing the AI strategy against buy & hold. No API keys
+  needed; run this to see the results.
+- **`main_bot.py`**  -  the live bot. Connects to Alpaca's paper-trading API and
+  actually places (simulated) trades based on the same model, on a schedule.
+  Requires Alpaca API credentials in a `.env` file.
 
 ---
 
@@ -73,7 +81,7 @@ python python/main_bot.py
 
 ## The Research Journey
 
-This project didn't start with the methodology described below — it evolved through
+This project didn't start with the methodology described below  -  it evolved through
 several rounds of finding a flaw, fixing it, and re-testing. That process is the actual
 substance of the project, so it's documented here rather than hidden:
 
@@ -87,13 +95,13 @@ substance of the project, so it's documented here rather than hidden:
 
 3. **Diagnosed the actual bottleneck: AUC ≈ 0.50.** Before trusting any P&L curve, we
    checked whether the model's raw predictions had any classification skill at all,
-   using AUC and log-loss. They didn't — consistently, across single-stock and
+   using AUC and log-loss. They didn't  -  consistently, across single-stock and
    cross-sectional targets, multiple forward-looking horizons, and two model families
    (Random Forest, LightGBM).
 
 4. **Reframed as a cross-sectional ranking problem.** Instead of predicting absolute
    direction, the model predicts whether a stock will outperform the *median* of a
-   20-49 stock universe over a fixed horizon — a more tractable question, since it
+   20-49 stock universe over a fixed horizon  -  a more tractable question, since it
    cancels out a lot of market-wide noise.
 
 5. **Fixed a real target/trading-rule mismatch.** An earlier version used the
@@ -102,7 +110,7 @@ substance of the project, so it's documented here rather than hidden:
    Fixed by switching to genuine Top-K long / Bottom-K short portfolio construction.
 
 6. **Replaced AUC with Information Coefficient (IC)** as the primary evaluation
-   metric — the correct tool for a ranking model, since binarizing at the median
+   metric  -  the correct tool for a ranking model, since binarizing at the median
    throws away information that a rank-correlation captures.
 
 7. **Caught and corrected a lookahead bias risk** in point-in-time fundamentals
@@ -113,10 +121,10 @@ substance of the project, so it's documented here rather than hidden:
 8. **Corrected an overlap-inflated significance test.** A 60-day-ahead forward
    return computed daily produces autocorrelated IC observations that overstate
    the effective sample size by ~60x. Re-tested using only non-overlapping,
-   independent rebalance periods — a much smaller but honest sample.
+   independent rebalance periods  -  a much smaller but honest sample.
 
 9. **Ran an empirical statistical-arbitrage / pairs-trading search** across ~380
-   candidate pairs, with a rolling-window cointegration stability check — this
+   candidate pairs, with a rolling-window cointegration stability check  -  this
    surfaces a real lesson in multiple-testing bias (testing many pairs at
    p<0.05 will produce ~5% false positives by chance alone).
 
@@ -133,18 +141,18 @@ substance of the project, so it's documented here rather than hidden:
 - **Target:** does a stock's forward N-day return exceed the cross-sectional
   median return of the universe on that date? (Horizons tested: 5, 10, 20, 60
   trading days.)
-- **Validation:** rolling walk-forward — train on ~3 years, validate threshold
+- **Validation:** rolling walk-forward  -  train on ~3 years, validate threshold
   selection on the following ~1 year, test out-of-sample on the next ~2 months,
   then roll forward and repeat.
 - **Evaluation metrics:**
-  - **AUC / log-loss** — raw classification skill on the binarized target.
-  - **Information Coefficient (IC)** — daily Spearman correlation between
+  - **AUC / log-loss**  -  raw classification skill on the binarized target.
+  - **Information Coefficient (IC)**  -  daily Spearman correlation between
     predicted probability and actual forward return; the metric that actually
     matches what a ranking model is trained to do.
-  - **Overlap-corrected significance test** — IC re-computed on only
+  - **Overlap-corrected significance test**  -  IC re-computed on only
     non-overlapping rebalance dates, with a t-test against zero, to avoid
     overstating confidence from autocorrelated daily samples.
-  - **Long-short (market-neutral) Sharpe** — Top-K long minus Bottom-K short,
+  - **Long-short (market-neutral) Sharpe**  -  Top-K long minus Bottom-K short,
     which cancels general market beta and isolates real ranking skill from
     "the strategy just happened to be invested during a bull market."
 
@@ -154,12 +162,12 @@ substance of the project, so it's documented here rather than hidden:
 
 | Test | Result |
 |---|---|
-| Single-stock direction prediction (RF, LightGBM) | AUC ≈ 0.45–0.52 across all tickers tested |
-| Cross-sectional ranking, technical features only | AUC ≈ 0.50, IC ≈ 0.00–0.03 |
+| Single-stock direction prediction (RF, LightGBM) | AUC ≈ 0.45-0.52 across all tickers tested |
+| Cross-sectional ranking, technical features only | AUC ≈ 0.50, IC ≈ 0.00-0.03 |
 | + Fundamentals (revenue growth, SUE, analyst momentum) | No measurable change in AUC or IC |
-| Horizon sweep (5/10/20/60 days) | 60-day horizon strongest, but not significant after correcting for multiple-horizon search and overlap bias (p ≈ 0.10–0.13) |
-| Empirical pairs-trading search (~380 pairs) | 1 surviving pair after two-stage screening — consistent with the false-positive rate expected from testing that many candidates, not a validated edge |
-| Long-short market-neutral spread (best-case setup) | Sharpe ~0.2–0.75 depending on configuration; statistical significance borderline to absent |
+| Horizon sweep (5/10/20/60 days) | 60-day horizon strongest, but not significant after correcting for multiple-horizon search and overlap bias (p ≈ 0.10-0.13) |
+| Empirical pairs-trading search (~380 pairs) | 1 surviving pair after two-stage screening  -  consistent with the false-positive rate expected from testing that many candidates, not a validated edge |
+| Long-short market-neutral spread (best-case setup) | Sharpe ~0.2-0.75 depending on configuration; statistical significance borderline to absent |
 
 **Honest conclusion:** no configuration tested here produced a signal that
 clearly and reliably survives rigorous out-of-sample, significance-corrected
@@ -201,10 +209,10 @@ management), not as evidence the underlying picks have real predictive value.
   Sharadar, Polygon).
 - **Multiple-comparisons risk.** Several results in this repo (horizon
   selection, pairs search) involved testing many candidates and reporting the
-  best — the README states this explicitly rather than presenting the winning
+  best  -  the README states this explicitly rather than presenting the winning
   result in isolation, since that framing materially changes how much
   confidence the result deserves.
-- **Short interest** was checked but excluded as a feature — `yfinance` only
+- **Short interest** was checked but excluded as a feature  -  `yfinance` only
   exposes a current snapshot, not a historical series, so including it would
   have introduced lookahead bias.
 - **Transaction cost and borrow-cost assumptions** are simplified (a flat cost
@@ -215,7 +223,7 @@ management), not as evidence the underlying picks have real predictive value.
 
 - Point-in-time-correct fundamentals from a paid vendor or SEC EDGAR's XBRL
   API, which provides real historical filing data with actual filing dates
-- Options-market data (implied volatility skew, put/call ratios) — reflects
+- Options-market data (implied volatility skew, put/call ratios)  -  reflects
   informed positioning rather than historical price shape
 - A genuinely out-of-sample pairs search: pre-register a smaller candidate set
   based on business logic, rather than scanning hundreds of combinations

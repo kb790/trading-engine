@@ -257,12 +257,12 @@ cum_bh = (1 + equal_weight_bh_ret).cumprod()
 # SINGLE GRAPH DISPLAY (Without Sharpe)
 plt.figure(figsize=(12, 7))
 plt.plot(cum_bh.index, cum_bh,
-         label=f"Buy & Hold (equal-weight, {panel['Ticker'].nunique()} stocks)  |  Final ${cum_bh.iloc[-1]:.2f}",
+         label=f"Buy & Hold (equal-weight, {panel['Ticker'].nunique()} stocks) | Final ${cum_bh.iloc[-1]:.2f}",
          color='gray', linestyle='--', linewidth=2)
 plt.plot(cum_long_only.index, cum_long_only,
-         label=f"AI Strategy (Top-{TOP_K} long only)  |  Final ${cum_long_only.iloc[-1]:.2f}",
+         label=f"AI Strategy (Top-{TOP_K} long only) | Final ${cum_long_only.iloc[-1]:.2f}",
          color='navy', linewidth=2)
-plt.title(f"AI Strategy vs. Buy & Hold  |  Horizon = {HORIZON} days")
+plt.title(f"AI Strategy vs. Buy & Hold | Horizon = {HORIZON} days")
 plt.ylabel('Growth of $1')
 plt.xlabel('Date')
 plt.legend(loc='upper left')

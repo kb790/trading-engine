@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 log = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------
-# 1. Configuration & Safety Parameters
+# 1. Configuration and Safety Parameters
 # ------------------------------------------------------------------
 API_KEY = os.getenv("ALPACA_API_KEY")
 SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
@@ -31,7 +31,7 @@ if not API_KEY or not SECRET_KEY:
     raise RuntimeError(
         "ALPACA_API_KEY / ALPACA_SECRET_KEY not found in environment. "
         "Set them via a .env file (UTF-8 encoded, no quotes) in the same "
-        "directory you run this script from -- never hardcode keys in "
+        "directory you run this script from. Never hardcode keys in "
         "the script."
     )
 
@@ -64,7 +64,7 @@ trading_client = TradingClient(API_KEY, SECRET_KEY, paper=PAPER_TRADING)
 
 
 # ------------------------------------------------------------------
-# 2. Risk Management & Guardrail Functions
+# 2. Risk Management and Guardrail Functions
 # ------------------------------------------------------------------
 def verify_account_health(trading_client: TradingClient) -> bool:
     account = trading_client.get_account()
@@ -83,7 +83,7 @@ def verify_account_health(trading_client: TradingClient) -> bool:
 
 
 # ------------------------------------------------------------------
-# 3. Model Pipeline & Signal Generation
+# 3. Model Pipeline and Signal Generation
 # ------------------------------------------------------------------
 def generate_top_signals() -> list:
     log.info("Fetching market data...")
@@ -176,7 +176,7 @@ def generate_top_signals() -> list:
     log.info(f"Prob_Up today: min={latest_data['Prob_Up'].min():.3f}, "
              f"max={latest_data['Prob_Up'].max():.3f}, std={prob_spread:.4f}")
     if prob_spread < MIN_PROB_SPREAD:
-        log.warning("Probabilities are tightly clustered today -- the top-K "
+        log.warning("Probabilities are tightly clustered today. The top-K "
                     "selection may be close to arbitrary tie-breaking rather "
                     "than a meaningful ranking. Proceeding, but treat today's "
                     "picks with extra skepticism.")
@@ -186,7 +186,7 @@ def generate_top_signals() -> list:
 
 
 # ------------------------------------------------------------------
-# 4. Portfolio Execution & Rebalancing
+# 4. Portfolio Execution and Rebalancing
 # ------------------------------------------------------------------
 def execute_rebalance():
     if not verify_account_health(trading_client):
@@ -244,7 +244,7 @@ def execute_rebalance():
 
         try:
             log.info(f"Placing Bracket Order: Buy {shares} shares of {symbol} "
-                     f"| TP: ${tp_price} | SL: ${sl_price}")
+                     f"TP: ${tp_price} SL: ${sl_price}")
             trading_client.submit_order(order_request)
         except Exception as e:
             log.error(f"Failed to execute order for {symbol}: {e}")
@@ -274,7 +274,7 @@ def is_market_open(trading_client: TradingClient) -> bool:
 
 
 def get_next_rebalance_open(trading_client: TradingClient, last_rebalance_date):
-    """Uses Alpaca's own market calendar (via GetCalendarRequest -- the
+    """Uses Alpaca's own market calendar (via GetCalendarRequest, since the
     modern alpaca-py API takes a filters object, not raw start/end kwargs)
     to find the exact date/time of the next scheduled rebalance."""
     if last_rebalance_date is None:
@@ -296,19 +296,19 @@ def get_next_rebalance_open(trading_client: TradingClient, last_rebalance_date):
         if idx >= len(calendar):
             raise RuntimeError(
                 f"Only {len(calendar)} trading days returned but HORIZON={HORIZON} "
-                f"requires at least {HORIZON} -- widen the calendar query window."
+                f"requires at least {HORIZON}. Widen the calendar query window."
             )
         target_day = calendar[idx]
 
     open_val = target_day.open
     if isinstance(open_val, datetime.datetime):
-        # SDK returned a full datetime -- attach/convert timezone as needed.
+        # SDK returned a full datetime, so attach/convert timezone as needed.
         target_open_dt = (
             open_val.replace(tzinfo=NY_TZ) if open_val.tzinfo is None
             else open_val.astimezone(NY_TZ)
         )
     else:
-        # SDK returned a plain time -- combine with the date ourselves.
+        # SDK returned a plain time, so combine with the date ourselves.
         target_open_dt = datetime.datetime.combine(target_day.date, open_val, tzinfo=NY_TZ)
 
     return target_open_dt
@@ -334,7 +334,7 @@ def run_continuously():
     if last_rebalance:
         log.info(f"Loaded last rebalance date from disk: {last_rebalance}")
     else:
-        log.info("No prior rebalance recorded -- scheduling for the next open trading day.")
+        log.info("No prior rebalance recorded. Scheduling for the next open trading day.")
 
     while True:
         try:
@@ -345,17 +345,17 @@ def run_continuously():
 
             time.sleep(60)
             if not is_market_open(trading_client):
-                log.warning("Target time reached but market clock reports closed -- "
-                            "recomputing next rebalance date without advancing state.")
+                log.warning("Target time reached but market clock reports closed. "
+                            "Recomputing next rebalance date without advancing state.")
                 continue
 
-            log.info("Target rebalance time reached -- executing rebalance.")
+            log.info("Target rebalance time reached. Executing rebalance.")
             execute_rebalance()
             last_rebalance = datetime.date.today()
             save_last_rebalance_date(last_rebalance)
 
         except Exception:
-            log.exception("Error in scheduling loop -- retrying in 1 hour.")
+            log.exception("Error in scheduling loop. Retrying in 1 hour.")
             time.sleep(3600)
 
 

@@ -11,7 +11,7 @@ the actual, well-evidenced answer this repo set out to find, and it's consistent
 decades of academic finance research on market efficiency in liquid, heavily-analyzed
 large-cap equities.
 
-**What's in this repo, in one line each:**
+**What's in this repo?**
 - **`main.py`**  -  the backtest. Trains the ranking model on historical data and
   produces a chart comparing the AI strategy against buy & hold. No API keys
   needed; run this to see the results.

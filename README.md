@@ -8,7 +8,7 @@ a backtest can look successful before it survives rigorous scrutiny.
 and a systematic search for statistical arbitrage pairs, no approach here produced a
 signal that reliably survives significance testing. That's not a failed project  -  it's
 the actual, well-evidenced answer this repo set out to find, and it's consistent with
-decades of academic finance research on market efficiency in liquid, heavily-analyzed
+decades of academic finance research on market efficiency in liquid, heavily-analysed
 large-cap equities.
 
 **What's in this repo?**
@@ -106,11 +106,11 @@ substance of the project, so it's documented here rather than hidden:
 
 5. **Fixed a real target/trading-rule mismatch.** An earlier version used the
    relative ranking to make an absolute per-stock hold/cash decision, which
-   structurally favors buy & hold in an up-trending sample regardless of model skill.
+   structurally favours buy & hold in an up-trending sample regardless of model skill.
    Fixed by switching to genuine Top-K long / Bottom-K short portfolio construction.
 
 6. **Replaced AUC with Information Coefficient (IC)** as the primary evaluation
-   metric  -  the correct tool for a ranking model, since binarizing at the median
+   metric  -  the correct tool for a ranking model, since binarising at the median
    throws away information that a rank-correlation captures.
 
 7. **Caught and corrected a lookahead bias risk** in point-in-time fundamentals
@@ -136,7 +136,7 @@ substance of the project, so it's documented here rather than hidden:
   financials, energy, healthcare, consumer, industrials, utilities).
 - **Features:** technical (lagged returns, SMA distance, RSI, MACD, Bollinger
   Band width, volume z-score) and point-in-time-lagged fundamentals (revenue
-  growth YoY, standardized unanticipated earnings, analyst upgrade/downgrade
+  growth YoY, standardised unanticipated earnings, analyst upgrade/downgrade
   momentum).
 - **Target:** does a stock's forward N-day return exceed the cross-sectional
   median return of the universe on that date? (Horizons tested: 5, 10, 20, 60
@@ -145,7 +145,7 @@ substance of the project, so it's documented here rather than hidden:
   selection on the following ~1 year, test out-of-sample on the next ~2 months,
   then roll forward and repeat.
 - **Evaluation metrics:**
-  - **AUC / log-loss**  -  raw classification skill on the binarized target.
+  - **AUC / log-loss**  -  raw classification skill on the binarised target.
   - **Information Coefficient (IC)**  -  daily Spearman correlation between
     predicted probability and actual forward return; the metric that actually
     matches what a ranking model is trained to do.
@@ -172,7 +172,7 @@ substance of the project, so it's documented here rather than hidden:
 **Honest conclusion:** no configuration tested here produced a signal that
 clearly and reliably survives rigorous out-of-sample, significance-corrected
 testing. Apparent wins in earlier iterations were traced to either overlap bias
-in the significance test, a target/trading-rule mismatch that favored buy & hold
+in the significance test, a target/trading-rule mismatch that favoured buy & hold
 by construction and was masking the real comparison, or risk-management overlays
 (trend filters, volatility scaling) improving risk-adjusted returns independent
 of whether the underlying ranking had any real skill.
@@ -217,7 +217,7 @@ management), not as evidence the underlying picks have real predictive value.
   have introduced lookahead bias.
 - **Transaction cost and borrow-cost assumptions** are simplified (a flat cost
   per trade); real-world short-selling costs, especially for less liquid
-  names, are not modeled.
+  names, are not modelled.
 
 ## What Would Be Worth Trying Next
 
